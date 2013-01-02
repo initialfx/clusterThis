@@ -22,30 +22,40 @@
 *  Return Value : int
 *
 ***************************************************************************** */
-int VRAY_clusterThis::instancePoint(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
+int VRAY_clusterThis::instancePoint(GU_Detail * inst_gdp, GU_Detail * mb_gdp,
+                                    VRAY_clusterThis::pt_attr_struct * thePointAttributes,
+                                    VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefs
+                                   )
 {
 
 #ifdef DEBUG
    std::cout << "VRAY_clusterThis::instancePoint()" << std::endl;
 #endif
 
+   std::cout << "VRAY_clusterThis::instancePoint() " << thePointAttributes->myNewPos << std::endl;
+
    GEO_Point * ppt;
 
    ppt = inst_gdp->appendPointElement();
-   ppt->setPos((float)myPointAttributes.myNewPos[0],
-               (float)myPointAttributes.myNewPos[1],
-               (float)myPointAttributes.myNewPos[2], 1.0);
+//   ppt->setPos((float)myPointAttributes.myNewPos[0],
+//               (float)myPointAttributes.myNewPos[1],
+//               (float)myPointAttributes.myNewPos[2], 1.0);
+   ppt->setPos((float)thePointAttributes->myNewPos[0],
+               (float)thePointAttributes->myNewPos[1],
+               (float)thePointAttributes->myNewPos[2], 1.0);
 
-   VRAY_clusterThis::setPointInstanceAttributes(inst_gdp, ppt);
+   VRAY_clusterThis::setPointInstanceAttributes(inst_gdp, ppt, thePointAttributes, theInstAttrRefs);
 
    if(myDoMotionBlur == CLUSTER_MB_DEFORMATION) {
          ppt = mb_gdp->appendPointElement();
-         ppt->setPos((float)myPointAttributes.myMBPos[0],
-                     (float)myPointAttributes.myMBPos[1],
-                     (float)myPointAttributes.myMBPos[2], 1.0);
-
-         VRAY_clusterThis::setPointInstanceAttributes(mb_gdp, ppt);
+//         ppt->setPos((float)myPointAttributes.myMBPos[0],
+//                     (float)myPointAttributes.myMBPos[1],
+//                     (float)myPointAttributes.myMBPos[2], 1.0);
+//
+//         VRAY_clusterThis::setPointInstanceAttributes(mb_gdp, ppt);
       }
+
+//   std::cout << "VRAY_clusterThis::instancePoint() myPointAttributes.myNewPos " << myPointAttributes.myNewPos << std::endl;
 
    if(myCVEX_Exec)
       VRAY_clusterThis::runCVEX(inst_gdp, mb_gdp, myCVEXFname, CLUSTER_CVEX_POINT);

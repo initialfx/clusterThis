@@ -5,7 +5,7 @@ src = VRAY_clusterThis.cpp VRAY_clusterThis.h \
    VRAY_clusterThisPreProcess.cpp VRAY_clusterThisPostProcess.cpp VRAY_clusterThisParms.cpp \
    VRAY_clusterThisUtil.cpp VRAY_clusterThisRender.cpp
 
-BUILD_DEV = 0
+BUILD_DEV = 1
 SOURCES = VRAY_clusterThis.cpp
 H_CFLAGS =  $(shell hcustom --cflags)
 # -DVERSION=\"12.1.33\" -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN

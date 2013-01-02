@@ -218,6 +218,65 @@ int VRAY_clusterThis::getAttributeRefs(GU_Detail * inst_gdp)
 }
 
 
+
+/* ******************************************************************************
+*  Function Name : checkRequiredAttributes
+*
+*  Description :  Check that all the required attributes are in the point cloud
+*
+*  Input Arguments : None
+*
+*  Return Value : None
+*
+***************************************************************************** */
+void VRAY_clusterThis::checkRequiredAttributes()
+{
+
+   // TODO: Confirm that all required attrs are being checked for each instance type
+
+//   std::cout << "VRAY_clusterThis::checkRequiredAttributes()" << std::endl;
+   // Check for required attributes
+   if(myPointAttrRefs.Cd.isInvalid()) {
+         cout << "Incoming points must have Cd attribute! Throwing exception ..." << endl;
+         throw VRAY_clusterThis_Exception("VRAY_clusterThis::checkRequiredAttributes() Incoming points must have Cd attribute! ", 1);
+      }
+
+   if(myPointAttrRefs.Alpha.isInvalid()) {
+         cout << "Incoming points must have Alpha attribute! Throwing exception ..." << endl;
+         throw VRAY_clusterThis_Exception("VRAY_clusterThis::checkRequiredAttributes() Incoming points must have Alpha attribute! ", 1);
+      }
+
+   if(myPointAttrRefs.v.isInvalid()) {
+         cout << "Incoming points must have v attribute! Throwing exception ..." << endl;
+         throw VRAY_clusterThis_Exception("VRAY_clusterThis::checkRequiredAttributes() Incoming points must have v attribute! ", 1);
+      }
+
+   if(myPointAttrRefs.N.isInvalid()) {
+         cout << "Incoming points must have N attribute! Throwing exception ..." << endl;
+         throw VRAY_clusterThis_Exception("VRAY_clusterThis::checkRequiredAttributes() Incoming points must have N attribute! ", 1);
+      }
+
+   if(myPointAttrRefs.pscale.isInvalid()) {
+         cout << "Incoming points must have pscale attribute! Throwing exception ..." << endl;
+         throw VRAY_clusterThis_Exception("VRAY_clusterThis::checkRequiredAttributes() Incoming points must have pscale attribute! ", 1);
+      }
+
+   if(myPointAttrRefs.id.isInvalid()) {
+         cout << "Incoming points must have id attribute Throwing exception ..." << endl;
+         throw VRAY_clusterThis_Exception("VRAY_clusterThis::checkRequiredAttributes() Incoming points must have id attribute! ", 1);
+      }
+
+   // Check for weight attribute if the user wants metaballs
+   if((myPrimType == CLUSTER_PRIM_METABALL) && (myPointAttrRefs.weight.isInvalid())) {
+         cout << "Incoming points must have weight attribute if instancing metaballs! Throwing exception ..." << std::endl;
+         throw VRAY_clusterThis_Exception("VRAY_clusterThis::checkRequiredAttributes() Incoming points must have weight attribute if instancing metaballs!", 1);
+      }
+
+
+}
+
+
+
 /* ******************************************************************************
 *  Function Name : getAttributes()
 *
@@ -285,6 +344,67 @@ inline int VRAY_clusterThis::getAttributes(GEO_Point * ppt)
 }
 
 
+
+
+inline int VRAY_clusterThis::getAttributes2(GEO_Point * ppt, VRAY_clusterThis::pt_attr_struct *thePointAttributes)
+{
+
+#ifdef DEBUG
+   cout << "VRAY_clusterThis::getAttributes() " << endl;
+#endif
+
+   thePointAttributes->Cd = static_cast<UT_Vector3>(ppt->getValue<UT_Vector3>(myPointAttrRefs.Cd, 0));
+   thePointAttributes->Alpha = static_cast<fpreal>(ppt->getValue<fpreal>(myPointAttrRefs.Alpha, 0));
+
+// TODO: Use the backtrack velocity to replace velocity? Not sure ...
+   if(myUseBacktrackMB)
+      thePointAttributes->v = static_cast<UT_Vector3>(ppt->getValue<UT_Vector4>(myPointAttrRefs.backtrack, 0));
+   else
+      thePointAttributes->v = static_cast<UT_Vector3>(ppt->getValue<UT_Vector3>(myPointAttrRefs.v, 0));
+
+//   thePointAttributes.v = static_cast<UT_Vector3>(ppt->getValue<UT_Vector3>(myPointAttrRefs.v, 0));
+   thePointAttributes->backtrack = static_cast<UT_Vector4>(ppt->getValue<UT_Vector4>(myPointAttrRefs.backtrack, 0));
+   thePointAttributes->up = static_cast<UT_Vector3>(ppt->getValue<UT_Vector3>(myPointAttrRefs.up, 0));
+   thePointAttributes->N = static_cast<UT_Vector3>(ppt->getValue<UT_Vector3>(myPointAttrRefs.N, 0));
+   thePointAttributes->N.normalize();
+
+   thePointAttributes->radius = static_cast<fpreal>(ppt->getValue<fpreal>(myPointAttrRefs.radius, 0));
+   thePointAttributes->vdb_radius = static_cast<fpreal>(ppt->getValue<fpreal>(myPointAttrRefs.vdb_radius, 0));
+   thePointAttributes->pscale = static_cast<fpreal>(ppt->getValue<fpreal>(myPointAttrRefs.pscale, 0));
+   thePointAttributes->width = static_cast<fpreal>(ppt->getValue<fpreal>(myPointAttrRefs.width, 0));
+   thePointAttributes->id = static_cast<int>(ppt->getValue<int>(myPointAttrRefs.id, 0));
+   thePointAttributes->material = ppt->getString(myPointAttrRefs.material) ;
+//     cout << "VRAY_clusterThis::getAttributes() thePointAttributes.material: " << thePointAttributes.material << endl;
+
+   if(myPrimType == CLUSTER_PRIM_METABALL)
+      thePointAttributes->weight = static_cast<fpreal>(ppt->getValue<fpreal>(myPointAttrRefs.weight, 0));
+
+   if(myPrimType == CLUSTER_FILE)
+      thePointAttributes->geo_fname = ppt->getString(myPointAttrRefs.geo_fname) ;
+
+#ifdef DEBUG
+   cout << "VRAY_clusterThis::getAttributes() " << "Cd: " << thePointAttributes.Cd << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "Alpha: " << thePointAttributes.Alpha << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "v: " << thePointAttributes.v << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "N: " << thePointAttributes.N << endl;
+//   cout << "VRAY_clusterThis::getAttributes() " << "orient: " << thePointAttributes.orient << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "pscale: " << thePointAttributes.pscale << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "radius: " << thePointAttributes.radius << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "vdb_radius: " << thePointAttributes.vdb_radius << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "id: " << thePointAttributes.id << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "weight: " << thePointAttributes.weight << endl;
+   cout << "VRAY_clusterThis::get_attributes() " << "material: " << thePointAttributes.material << endl;
+   cout << "VRAY_clusterThis::get_attributes() " << "geo_fname: " << thePointAttributes.geo_fname << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "myMaterial: " << myMaterial << endl;
+#endif
+
+   return 0;
+
+}
+
+
+
+
 /* ******************************************************************************
 *  Function Name : addFileAttributeRefs()
 *
@@ -340,26 +460,32 @@ inline int VRAY_clusterThis::addFileAttributeRefs(GU_Detail * inst_gdp)
 *  Return Value : void
 *
 ***************************************************************************** */
-inline void VRAY_clusterThis::setPointInstanceAttributes(GU_Detail * inst_gdp, GEO_Point * ppt)
+inline void VRAY_clusterThis::setPointInstanceAttributes(GU_Detail * inst_gdp, GEO_Point * ppt,
+                                                         VRAY_clusterThis::pt_attr_struct * thePointAttributes,
+                                                         VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefs
+                                                         )
 {
 
 #ifdef DEBUG
-   cout << "VRAY_clusterThis::setPointInstanceAttributes() " << endl;
+   std::cout << "VRAY_clusterThis::setPointInstanceAttributes() " << std::endl;
 #endif
 
 // TODO: Determine which attibutes are *really* required for point instancing, examine shaders, perhaps add compile time switches
 // user wants to have more attributes passed to the shaders.
 
-   ppt->setValue<UT_Vector3>(myInstAttrRefs.pointCd, (const UT_Vector3)myPointAttributes.Cd);
-   ppt->setValue<fpreal>(myInstAttrRefs.pointAlpha, (const fpreal)myPointAttributes.Alpha);
-   ppt->setValue<UT_Vector3>(myInstAttrRefs.pointV, (const UT_Vector3)myPointAttributes.v);
-   ppt->setValue<UT_Vector3>(myInstAttrRefs.pointBacktrack, (const UT_Vector3)myPointAttributes.backtrack);
-   ppt->setValue<UT_Vector3>(myInstAttrRefs.pointN, (const UT_Vector3)myPointAttributes.N);
-   ppt->setValue<fpreal>(myInstAttrRefs.pointRadius, (const fpreal)myPointAttributes.radius);
-   ppt->setValue<fpreal>(myInstAttrRefs.pointPscale, (const fpreal)myPointAttributes.pscale);
-   ppt->setValue<int>(myInstAttrRefs.pointId, (const int)myPointAttributes.id);
-   ppt->setValue<int>(myInstAttrRefs.pointInstId, (const int)myInstanceNum);
-   ppt->setString(myInstAttrRefs.pointMaterial, myPointAttributes.material);
+   ppt->setValue<UT_Vector3>(theInstAttrRefs->pointCd, (const UT_Vector3)thePointAttributes->Cd);
+   ppt->setValue<fpreal>(theInstAttrRefs->pointAlpha, (const fpreal)thePointAttributes->Alpha);
+   ppt->setValue<UT_Vector3>(theInstAttrRefs->pointV, (const UT_Vector3)thePointAttributes->v);
+   ppt->setValue<UT_Vector3>(theInstAttrRefs->pointBacktrack, (const UT_Vector3)thePointAttributes->backtrack);
+   ppt->setValue<UT_Vector3>(theInstAttrRefs->pointN, (const UT_Vector3)thePointAttributes->N);
+   ppt->setValue<fpreal>(theInstAttrRefs->pointRadius, (const fpreal)thePointAttributes->radius);
+   ppt->setValue<fpreal>(theInstAttrRefs->pointPscale, (const fpreal)thePointAttributes->pscale);
+   ppt->setValue<int>(theInstAttrRefs->pointId, (const int)thePointAttributes->id);
+   ppt->setValue<int>(theInstAttrRefs->pointInstId, (const int)myInstanceNum);
+   ppt->setString(theInstAttrRefs->pointMaterial, thePointAttributes->material);
+
+//   std::cout << "VRAY_clusterThis::setPointInstanceAttributes() thePointAttributes->Cd: "
+//   << thePointAttributes->Cd << " ppt Cd: " << static_cast<UT_Vector3>(ppt->getValue<UT_Vector3>(theInstAttrRefs.pointCd, 0)) << std::endl;
 
 }
 

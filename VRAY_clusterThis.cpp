@@ -67,6 +67,7 @@
 #include <cstdio>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <openvdb/openvdb.h>
 #include <openvdb/tools/LevelSetSphere.h>
@@ -668,7 +669,7 @@ int VRAY_clusterThis::initialize(const UT_BoundingBox * box)
 *
 *  Description :   Calculate the position of the new instance
 *
-*  Input Arguments : int i, int j
+*  Input Arguments : fpreal theta, uint32 i, uint32 j
 *
 *  Return Value : None
 *
@@ -747,6 +748,96 @@ inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint3
         << myPointAttributes.myPos.x() << " " << myPointAttributes.myPos.y() << " " << myPointAttributes.myPos.z() << endl;
    cout << "VRAY_clusterThis::calculateNewPosition() newPos: "
         << myPointAttributes.myNewPos[0] << " " << myPointAttributes.myNewPos[1] << " " << myPointAttributes.myNewPos[2] << endl;
+#endif
+
+}
+
+
+/* ******************************************************************************
+*  Function Name : calculateNewPosition()
+*
+*  Description :   Calculate the position of the new instance
+*
+*  Input Arguments :fpreal theta, uint32 i, uint32 j, , UT_Vector4 *myPos
+*
+*  Return Value : None
+*
+***************************************************************************** */
+inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint32 j,
+                                                   VRAY_clusterThis::pt_attr_struct *thePointAttributes)
+{
+#ifdef DEBUG
+   cout << "VRAY_clusterThis::calculateNewPosition() i: " << i << " j: " << j << endl;
+#endif
+
+   // Calculate a new position for the object ...
+   fpreal delta = theta * i;
+   fpreal noise_bias;
+   fpreal dx, dy, dz = 0.0;
+   fpreal radius;
+   dx = SYSsin(delta * myFreqX + myOffsetX);
+   dy = SYScos(delta * myFreqY + myOffsetY);
+   dz = SYScos(delta * myFreqZ + myOffsetZ);
+
+#ifdef DEBUG
+   cout << "VRAY_clusterThis::calculateNewPosition() " << "delta: " << delta << endl;
+   cout << "VRAY_clusterThis::calculateNewPosition() " << "dx: " << dx << " dy: " << dy << " dz: " << dz << endl;
+#endif
+
+   if(myNoiseType < 4) {
+         myNoise.setSeed(thePointAttributes->id);
+         noise_bias = (myNoise.turbulence(thePointAttributes->myPos, myFractalDepth, myRough, myNoiseAtten) * myNoiseAmp) + 1.0;
+//         cout << "VRAY_clusterThis::calculateNewPosition() turbulence: " << "noise_bias: " << noise_bias << endl;
+      }
+   else {
+         myMersenneTwister.setSeed(thePointAttributes->id);
+         noise_bias = (myMersenneTwister.frandom() * myNoiseAmp) + 1.0;
+//         cout << "VRAY_clusterThis::calculateNewPosition() myMersenneTwister: " << "noise_bias: " << noise_bias << endl;
+      }
+
+
+#ifdef DEBUG
+   cout << "VRAY_clusterThis::calculateNewPosition() " << "noise_bias: " << noise_bias << endl;
+#endif
+
+   if(myUsePointRadius)
+      radius = thePointAttributes->radius;
+   else
+      radius = myRadius;
+
+
+   // Calculate the new object's position
+   thePointAttributes->myNewPos[0] = (fpreal) thePointAttributes->myPos.x() +
+                                   ((dx * radius) * noise_bias * SYSsin(static_cast<fpreal>(j + i)));
+   thePointAttributes->myNewPos[1] = (fpreal) thePointAttributes->myPos.y() +
+                                   ((dy * radius) * noise_bias * SYScos(static_cast<fpreal>(j + i)));
+   thePointAttributes->myNewPos[2] = (fpreal) thePointAttributes->myPos.z() +
+                                   ((dz * radius) * noise_bias * (SYSsin(static_cast<fpreal>(j + i)) + SYScos(static_cast<fpreal>(j + i))));
+//   thePointAttributes->myNewPos[2] = ( fpreal ) thePointAttributes->myPos.z() +
+//                                    ( ( dz * radius ) * noise_bias * ( SYScos ( static_cast<fpreal>(j + i)) ) );
+
+   if(myDoMotionBlur == CLUSTER_MB_DEFORMATION) {
+//         thePointAttributes->myMBPos[0] = thePointAttributes->myNewPos[0] + thePointAttributes->v.x();
+//         thePointAttributes->myMBPos[1] = thePointAttributes->myNewPos[1] + thePointAttributes->v.y();
+//         thePointAttributes->myMBPos[2] = thePointAttributes->myNewPos[2] + thePointAttributes->v.z();
+
+         if(myUseBacktrackMB) {
+               thePointAttributes->myMBPos[0] = thePointAttributes->myNewPos[0] - thePointAttributes->backtrack.x();
+               thePointAttributes->myMBPos[1] = thePointAttributes->myNewPos[1] - thePointAttributes->backtrack.y();
+               thePointAttributes->myMBPos[2] = thePointAttributes->myNewPos[2] - thePointAttributes->backtrack.z();
+            }
+         else {
+               thePointAttributes->myMBPos[0] = thePointAttributes->myNewPos[0] - thePointAttributes->v.x();
+               thePointAttributes->myMBPos[1] = thePointAttributes->myNewPos[1] - thePointAttributes->v.y();
+               thePointAttributes->myMBPos[2] = thePointAttributes->myNewPos[2] - thePointAttributes->v.z();
+            }
+      }
+
+#ifdef DEBUG
+   cout << "VRAY_clusterThis::calculateNewPosition() myPos:   "
+        << thePointAttributes->myPos.x() << " " << thePointAttributes->myPos.y() << " " << thePointAttributes->myPos.z() << endl;
+   cout << "VRAY_clusterThis::calculateNewPosition() newPos: "
+        << thePointAttributes->myNewPos[0] << " " << thePointAttributes->myNewPos[1] << " " << thePointAttributes->myNewPos[2] << endl;
 #endif
 
 }

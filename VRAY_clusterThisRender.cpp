@@ -25,13 +25,10 @@ void VRAY_clusterThis::render()
 {
 //   GU_Detail * gdp;
    GU_Detail * inst_gdp, *mb_gdp, *file_gdp;
-   GEO_Point * ppt;
    UT_BoundingBox tmpBox;
 
    myRenderTime = std::clock();
    std::time(&myRenderStartTime);
-
-   long int point_num = 0;
 
    tempFileDeleted = false;
    static bool rendered = false;
@@ -88,9 +85,6 @@ void VRAY_clusterThis::render()
                if(myVerbose > CLUSTER_MSG_INFO)
                   cout << "VRAY_clusterThis::render() myLOD: " << myLOD << std::endl;
 
-               // Get the number if points of the incoming geometery, calculate an interval for reporting the status of the instancing to the user
-               long int stat_interval = (long int)(myNumSourcePoints * 0.10) + 1;
-
                if(myVerbose > CLUSTER_MSG_QUIET)
                   cout << "VRAY_clusterThis::render() Number of points of incoming geometry: " << myNumSourcePoints << std::endl;
 
@@ -131,7 +125,9 @@ void VRAY_clusterThis::render()
 //changeSetting("surface", "constant Cd ( 1 0 0 )", "object");
 
                fpreal theta = (2.0 * M_PI) / myNumCopies;
-               myInstanceNum = 0;
+//               myInstanceNum = 0;
+               myInstanceNum = myNumSourcePoints * myRecursion * myNumCopies;
+
 
                if(myCVEX_Exec_pre) {
                      if(myVerbose > CLUSTER_MSG_INFO)
@@ -140,85 +136,20 @@ void VRAY_clusterThis::render()
                   }
 
 
-               /// For each point of the incoming geometry
-               GA_FOR_ALL_GPOINTS(myGdp, ppt) {
-                  myPointAttributes.myPos = ppt->getPos();
+               myGDPReferences.gdp = myGdp;
+               myGDPReferences.inst_gdp = inst_gdp;
+               myGDPReferences.mb_gdp = mb_gdp;
+               myGDPReferences.file_gdp = file_gdp;
+               float foo;
+               renderGenerateInstance(theta, &foo);
 
-                  // get the point's attributes
-                  VRAY_clusterThis::getAttributes(ppt);
 
-                  uint seed = 37;
-                  fpreal dice;
-                  bool skip = false;
+//               myGdp = myGDPReferences.gdp;
+//               inst_gdp = myGDPReferences.inst_gdp;
+//               mb_gdp = myGDPReferences.mb_gdp;
+//               file_gdp = myGDPReferences.file_gdp;
 
-                  if(myPrimType != CLUSTER_PRIM_CURVE) {
-
-                        // For each point, make a number of copies of and recurse a number of times for each copy ...
-                        for(int copyNum = 0; copyNum < myNumCopies; copyNum++) {
-                              for(int recursionNum = 0; recursionNum < myRecursion; recursionNum++) {
-
-                                    // generate random number to determine to instance or not
-                                    dice = SYSfastRandom(seed);
-                                    bool(dice >= myBirthProb) ? skip = true : skip = false;
-//                  cout << dice << " " << skip << std::endl;
-                                    seed = uint(dice * 137);
-
-                                    // Calculate the position for the next instanced object ...
-                                    VRAY_clusterThis::calculateNewPosition(theta, copyNum, recursionNum);
-
-                                    if(!skip) {
-                                          // Create a primitive based upon user's selection
-                                          switch(myPrimType) {
-                                                case CLUSTER_POINT:
-                                                   VRAY_clusterThis::instancePoint(inst_gdp, mb_gdp);
-                                                   break;
-                                                case CLUSTER_PRIM_SPHERE:
-                                                   VRAY_clusterThis::instanceSphere(inst_gdp, mb_gdp);
-                                                   break;
-                                                case CLUSTER_PRIM_CUBE:
-                                                   VRAY_clusterThis::instanceCube(inst_gdp, mb_gdp);
-                                                   break;
-                                                case CLUSTER_PRIM_GRID:
-                                                   VRAY_clusterThis::instanceGrid(inst_gdp, mb_gdp);
-                                                   break;
-                                                case CLUSTER_PRIM_TUBE:
-                                                   VRAY_clusterThis::instanceTube(inst_gdp, mb_gdp);
-                                                   break;
-                                                case CLUSTER_PRIM_CIRCLE:
-                                                   VRAY_clusterThis::instanceCircle(inst_gdp, mb_gdp);
-                                                   break;
-                                                case CLUSTER_PRIM_METABALL:
-                                                   VRAY_clusterThis::instanceMetaball(inst_gdp, mb_gdp);
-                                                   break;
-                                                case CLUSTER_FILE:
-                                                   VRAY_clusterThis::instanceFile(file_gdp, inst_gdp, mb_gdp);
-                                                   break;
-                                             }
-
-                                          myInstanceNum++;
-
-#ifdef DEBUG
-                                          cout << "VRAY_clusterThis::render() - myInstanceNum: " << myInstanceNum << std::endl;
-#endif
-
-                                       } // if(!skip) ...
-                                 } // for number of recursions ...
-                           } // for number of copies ...
-                     } // if(myPrimType != CLUSTER_PRIM_CURVE) ...
-
-                  // User wants a curve instanced on this point
-                  if((myPrimType == CLUSTER_PRIM_CURVE) && (!skip))
-                     VRAY_clusterThis::instanceCurve(inst_gdp, mb_gdp, theta, point_num);
-
-                  // Increment our point counter
-                  point_num++;
-
-                  // Print out stats to the console
-                  if(myVerbose > CLUSTER_MSG_INFO && (myPrimType != CLUSTER_PRIM_CURVE))
-                     if((long int)(point_num % stat_interval) == 0)
-                        cout << "VRAY_clusterThis::render() Number of points processed: " << point_num << " Number of instances: " << myInstanceNum << std::endl;
-
-               } // for all points ...
+               cout << "VRAY_clusterThis::render() myInstanceNum2: " << myInstanceNum2 << std::endl;
 
 
                if(myVerbose > CLUSTER_MSG_QUIET && myPrimType != CLUSTER_PRIM_CURVE)
@@ -340,7 +271,6 @@ void VRAY_clusterThis::render()
       } // try ...
 
 
-
    // Process exceptions ...
    catch(VRAY_clusterThis_Exception e) {
          e.what();
@@ -388,7 +318,184 @@ void VRAY_clusterThis::render()
 
 
 
+
+void VRAY_clusterThis::renderGenerateInstancePartial(float theta, float * result, const UT_JobInfo & info)
+
+{
+   GU_Detail * inst_gdp_tmp;
+   GU_Detail * inst_gdp1;
+   GU_Detail * inst_gdp2;
+   GU_Detail * foo_gdp;
+
+   VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefsTMP;
+   VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefs1;
+   VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefs2;
+
+   inst_gdp1 = VRAY_Procedural::allocateGeometry();
+   inst_gdp2 = VRAY_Procedural::allocateGeometry();
+
+
+   GEO_Point * ppt;
+   int range_start, range_end;
+   long int point_num = 0;
+   struct pt_attr_struct thePointAttributes;
+//   struct pt_attr_struct *thePointAttributesPtr = thePointAttributes;
+
+   myRenderGenTime = std::clock();
+   std::time(&myRenderGenStartTime);
+   int job = info.job();
+
+   if(myVerbose > CLUSTER_MSG_QUIET)
+      cout << "VRAY_clusterThis::renderGenerateInstancePartial() job# " << job << std::endl;
+
+   info.divideWork(myNumSourcePoints, range_start, range_end);
+
+   // Get the number if points of the incoming geometery, calculate an interval for reporting the status of the instancing to the user
+   long int stat_interval = (long int)(myNumSourcePoints * 0.10) + 1;
+
+
+   if(range_start == 0)
+      range_end = range_end - 1;
+
+   if(myVerbose == CLUSTER_MSG_DEBUG) {
+         cout << "VRAY_clusterThis::renderGenerateInstancePartial() info.job() " << info.job()
+              << " info.numJobs() " << info.numJobs() << " info.nextTask (): " << info.nextTask() << std::endl;
+         cout << "VRAY_clusterThis::renderGenerateInstancePartial() stat_interval: " << stat_interval
+              <<  " range_start: " << range_start << " range_end: " << range_end << std::endl;
+      }
+
+
+   if(job == 0) {
+         inst_gdp_tmp = inst_gdp1;
+         VRAY_clusterThis::createAttributeRefs(inst_gdp1, foo_gdp, theInstAttrRefs1);
+         theInstAttrRefsTMP = theInstAttrRefs1;
+      }
+
+   else {
+         inst_gdp_tmp = inst_gdp2;
+         VRAY_clusterThis::createAttributeRefs(inst_gdp2, foo_gdp, theInstAttrRefs2);
+         theInstAttrRefsTMP = theInstAttrRefs2;
+      }
+
+
+/// For each point of the incoming geometry
+
+   for(; range_start < range_end; range_start++) {
+
+         ppt = myGDPReferences.gdp->points()(range_start);
+         thePointAttributes.myPos = ppt->getPos();
+
+         // get the point's attributes
+         VRAY_clusterThis::getAttributes2(ppt, &thePointAttributes);
+
+//         cout << "VRAY_clusterThis::renderGenerateInstancePartial() job# " << job
+//              << " - range_start: " << range_start
+//              << " thePointAttributes.myPos: " << thePointAttributes.myPos
+//              << " thePointAttributes.Cd " << thePointAttributes.Cd  << std::endl;
+
+         uint seed = 37;
+         fpreal dice;
+         bool skip = false;
+
+         if(myPrimType != CLUSTER_PRIM_CURVE) {
+
+               // For each point, make a number of copies of and recurse a number of times for each copy ...
+               for(int copyNum = 0; copyNum < myNumCopies; copyNum++) {
+                     for(int recursionNum = 0; recursionNum < myRecursion; recursionNum++) {
+
+                           // generate random number to determine to instance or not
+                           dice = SYSfastRandom(seed);
+                           bool(dice >= myBirthProb) ? skip = true : skip = false;
+//                  cout << dice << " " << skip << std::endl;
+                           seed = uint(dice * 137);
+
+                           // Calculate the position for the next instanced object ...
+                           VRAY_clusterThis::calculateNewPosition(theta, copyNum, recursionNum, &thePointAttributes);
+
+                           if(!skip) {
+                                 // Create a primitive based upon user's selection
+                                 switch(myPrimType) {
+                                       case CLUSTER_POINT:
+                                          VRAY_clusterThis::instancePoint(inst_gdp_tmp, myGDPReferences.mb_gdp, &thePointAttributes, theInstAttrRefsTMP);
+                                          break;
+                                       case CLUSTER_PRIM_SPHERE:
+                                          VRAY_clusterThis::instanceSphere(myGDPReferences.inst_gdp, myGDPReferences.mb_gdp);
+                                          break;
+                                       case CLUSTER_PRIM_CUBE:
+                                          VRAY_clusterThis::instanceCube(myGDPReferences.inst_gdp, myGDPReferences.mb_gdp);
+                                          break;
+                                       case CLUSTER_PRIM_GRID:
+                                          VRAY_clusterThis::instanceGrid(myGDPReferences.inst_gdp, myGDPReferences.mb_gdp);
+                                          break;
+                                       case CLUSTER_PRIM_TUBE:
+                                          VRAY_clusterThis::instanceTube(myGDPReferences.inst_gdp, myGDPReferences.mb_gdp);
+                                          break;
+                                       case CLUSTER_PRIM_CIRCLE:
+                                          VRAY_clusterThis::instanceCircle(myGDPReferences.inst_gdp, myGDPReferences.mb_gdp);
+                                          break;
+                                       case CLUSTER_PRIM_METABALL:
+                                          VRAY_clusterThis::instanceMetaball(myGDPReferences.inst_gdp, myGDPReferences.mb_gdp);
+                                          break;
+                                       case CLUSTER_FILE:
+                                          VRAY_clusterThis::instanceFile(myGDPReferences.file_gdp, myGDPReferences.inst_gdp, myGDPReferences.mb_gdp);
+                                          break;
+                                    }
+
+                              } // if(!skip) ...
+                        } // for number of recursions ...
+                  } // for number of copies ...
+            } // if(myPrimType != CLUSTER_PRIM_CURVE) ...
+
+         // User wants a curve instanced on this point
+         if((myPrimType == CLUSTER_PRIM_CURVE) && (!skip))
+            VRAY_clusterThis::instanceCurve(myGDPReferences.inst_gdp, myGDPReferences.mb_gdp, theta, point_num);
+
+         // Increment our point counter
+         point_num++;
+
+         // Print out stats to the console
+         if(myVerbose > CLUSTER_MSG_INFO && (myPrimType != CLUSTER_PRIM_CURVE))
+            if((long int)(point_num % stat_interval) == 0)
+               cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job << " Number of points processed: " << point_num << " Number of instances: " << myInstanceNum << std::endl;
+
+      } // for all points ...
+
+
+   {
+      UT_AutoJobInfoLock foo(info);
+
+//     cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job << " LOCK a: " << a << std::endl;
+
+      *result += point_num;
+      cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job
+           << " XXXXXXXXXXXXXXXXXXXXXX *result: " << *result << std::endl;
+      sleep(5);
+   }
+
+   myGDPReferences.inst_gdp->merge(*inst_gdp1);
+   myGDPReferences.inst_gdp->merge(*inst_gdp2);
+//   myGDPReferences.mb_gdp.merge;
+
+   cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job << " merged geometry"  << std::endl;
+
+
+   if(inst_gdp1)
+      VRAY_Procedural::freeGeometry(inst_gdp1);
+   if(inst_gdp2)
+      VRAY_Procedural::freeGeometry(inst_gdp2);
+
+   cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job << " freeGeometry()"  << std::endl;
+
+   std::time(&myRenderGenEndTime);
+   myRenderGenExecTime = std::clock() - myRenderGenTime;
+
+
+}
+
 #endif
+
+
+
 
 
 
