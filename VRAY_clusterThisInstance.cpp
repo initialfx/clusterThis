@@ -22,7 +22,7 @@
 *  Return Value : int
 *
 ***************************************************************************** */
-int VRAY_clusterThis::instancePoint(GU_Detail * inst_gdp, GU_Detail * mb_gdp,
+inline int VRAY_clusterThis::instancePoint(GU_Detail * inst_gdp, GU_Detail * mb_gdp,
                                     VRAY_clusterThis::pt_attr_struct * thePointAttributes,
                                     VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefs
                                    )
