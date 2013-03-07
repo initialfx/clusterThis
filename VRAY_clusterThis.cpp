@@ -177,7 +177,7 @@ VRAY_clusterThis_Exception::VRAY_clusterThis_Exception(std::string msg, int code
 ***************************************************************************** */
 VRAY_clusterThis::VRAY_clusterThis()
 {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::VRAY_clusterThis() - Constructor" << std::endl;
 #endif
 
@@ -443,6 +443,10 @@ int VRAY_clusterThis::initialize(const UT_BoundingBox * box)
    handle = VRAY_Procedural::queryObject(0);
    myGdp = VRAY_Procedural::allocateGeometry();
 
+//            cout << "VRAY_clusterThis::initialize() - handle: " << handle << endl;
+   assert(myGdp != NULL);
+
+
    if(myUseGeoFile) {
          // If the file failed to load, throw an exception
          if(!(myGdp->load((const char *)mySrcGeoFname).success()))
@@ -470,7 +474,7 @@ int VRAY_clusterThis::initialize(const UT_BoundingBox * box)
    myMaterial.harden();
 //         myPointAttributes.material = myMaterial;
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::initialize() myMaterial: " << myMaterial << std::endl;
 #endif
 
@@ -479,7 +483,7 @@ int VRAY_clusterThis::initialize(const UT_BoundingBox * box)
 //      cout << "VRAY_clusterThis::initialize() Object Name: " << myObjectName << std::endl;
 //      cout << "VRAY_clusterThis::initialize() Root Name: " << queryRootName() << std::endl;
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "Geometry Samples: " << queryGeometrySamples(handle) << std::endl;
 #endif
 
@@ -548,7 +552,7 @@ int VRAY_clusterThis::initialize(const UT_BoundingBox * box)
          noise_bias = (myMersenneTwister.frandom() * myNoiseAmp) + 1.0;
       }
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::initialize() " << "noise_bias: " << noise_bias << endl;
 #endif
 
@@ -569,17 +573,13 @@ int VRAY_clusterThis::initialize(const UT_BoundingBox * box)
 //         // like breaking up the point cloud into regular grids, etc.
 //         mySRCPointList.append(i);
 
+         pscale = static_cast<fpreal>(ppt->getValue<fpreal>(myPointAttrRefs.pscale, 0));
+
          if(myUsePointRadius)
             radius = static_cast<fpreal>(ppt->getValue<fpreal>(myPointAttrRefs.radius, 0));
          else
             radius = myRadius;
-
-         pscale = static_cast<fpreal>(ppt->getValue<fpreal>(myPointAttrRefs.pscale, 0));
-
-         if(myUsePointRadius)
-            scale = (radius + noise_bias) * pscale;
-         else
-            scale = (myRadius + noise_bias) * pscale;
+         scale = (radius + noise_bias) * pscale;
 
          mySRCPointTree.appendPtRadius(myGdp, ppt, radius);
 
@@ -647,6 +647,9 @@ int VRAY_clusterThis::initialize(const UT_BoundingBox * box)
 //         std::cout << "VRAY_clusterThis::initialize() box max: " << box->xmax() << " " << box->ymax() << " " << box->zmax() << std::endl;
 //      }
 
+   myLOD = getLevelOfDetail(myBox);
+   if(myVerbose > CLUSTER_MSG_INFO)
+      cout << "VRAY_clusterThis::initialize() myLOD: " << myLOD << std::endl;
 
    myPointTreeMemUsage = mySRCPointTree.getMemoryUsage();
 
@@ -676,7 +679,7 @@ int VRAY_clusterThis::initialize(const UT_BoundingBox * box)
 ***************************************************************************** */
 inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint32 j)
 {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::calculateNewPosition() i: " << i << " j: " << j << endl;
 #endif
 
@@ -689,7 +692,7 @@ inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint3
    dy = SYScos(delta * myFreqY + myOffsetY);
    dz = SYScos(delta * myFreqZ + myOffsetZ);
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::calculateNewPosition() " << "delta: " << delta << endl;
    cout << "VRAY_clusterThis::calculateNewPosition() " << "dx: " << dx << " dy: " << dy << " dz: " << dz << endl;
 #endif
@@ -706,7 +709,7 @@ inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint3
       }
 
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::calculateNewPosition() " << "noise_bias: " << noise_bias << endl;
 #endif
 
@@ -743,7 +746,7 @@ inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint3
             }
       }
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::calculateNewPosition() myPos:   "
         << myPointAttributes.myPos.x() << " " << myPointAttributes.myPos.y() << " " << myPointAttributes.myPos.z() << endl;
    cout << "VRAY_clusterThis::calculateNewPosition() newPos: "
@@ -764,9 +767,9 @@ inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint3
 *
 ***************************************************************************** */
 inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint32 j,
-                                                   VRAY_clusterThis::pt_attr_struct *thePointAttributes)
+      VRAY_clusterThis::pt_attr_struct * thePointAttributes)
 {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::calculateNewPosition() i: " << i << " j: " << j << endl;
 #endif
 
@@ -779,7 +782,7 @@ inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint3
    dy = SYScos(delta * myFreqY + myOffsetY);
    dz = SYScos(delta * myFreqZ + myOffsetZ);
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::calculateNewPosition() " << "delta: " << delta << endl;
    cout << "VRAY_clusterThis::calculateNewPosition() " << "dx: " << dx << " dy: " << dy << " dz: " << dz << endl;
 #endif
@@ -796,7 +799,7 @@ inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint3
       }
 
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::calculateNewPosition() " << "noise_bias: " << noise_bias << endl;
 #endif
 
@@ -808,11 +811,11 @@ inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint3
 
    // Calculate the new object's position
    thePointAttributes->myNewPos[0] = (fpreal) thePointAttributes->myPos.x() +
-                                   ((dx * radius) * noise_bias * SYSsin(static_cast<fpreal>(j + i)));
+                                     ((dx * radius) * noise_bias * SYSsin(static_cast<fpreal>(j + i)));
    thePointAttributes->myNewPos[1] = (fpreal) thePointAttributes->myPos.y() +
-                                   ((dy * radius) * noise_bias * SYScos(static_cast<fpreal>(j + i)));
+                                     ((dy * radius) * noise_bias * SYScos(static_cast<fpreal>(j + i)));
    thePointAttributes->myNewPos[2] = (fpreal) thePointAttributes->myPos.z() +
-                                   ((dz * radius) * noise_bias * (SYSsin(static_cast<fpreal>(j + i)) + SYScos(static_cast<fpreal>(j + i))));
+                                     ((dz * radius) * noise_bias * (SYSsin(static_cast<fpreal>(j + i)) + SYScos(static_cast<fpreal>(j + i))));
 //   thePointAttributes->myNewPos[2] = ( fpreal ) thePointAttributes->myPos.z() +
 //                                    ( ( dz * radius ) * noise_bias * ( SYScos ( static_cast<fpreal>(j + i)) ) );
 
@@ -833,7 +836,7 @@ inline void VRAY_clusterThis::calculateNewPosition(fpreal theta, uint32 i, uint3
             }
       }
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::calculateNewPosition() myPos:   "
         << thePointAttributes->myPos.x() << " " << thePointAttributes->myPos.y() << " " << thePointAttributes->myPos.z() << endl;
    cout << "VRAY_clusterThis::calculateNewPosition() newPos: "

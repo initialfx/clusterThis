@@ -22,45 +22,45 @@
 *  Return Value : void
 *
 ***************************************************************************** */
-void VRAY_clusterThis::createAttributeRefs(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
+void VRAY_clusterThis::createAttributeRefs(GU_Detail * inst_gdp, GU_Detail * mb_gdp,
+                                           VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefs)
 {
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::createAttributeRefs() " << endl;
 #endif
-
 
 // TODO: Check all these references with *.isValid() and throw exeception if it fails !!!
 
    if(myPrimType != CLUSTER_POINT) {
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
          cout << "VRAY_clusterThis::createAttributeRefs() Creating primitive attributes" << endl;
 #endif
 
-         myInstAttrRefs.Cd = inst_gdp->addDiffuseAttribute(GEO_PRIMITIVE_DICT);
-         myInstAttrRefs.Alpha = inst_gdp->addAlphaAttribute(GEO_PRIMITIVE_DICT);
-         myInstAttrRefs.v = inst_gdp->addVelocityAttribute(GEO_PRIMITIVE_DICT);
-         myInstAttrRefs.N = inst_gdp->addNormalAttribute(GEO_PRIMITIVE_DICT);
-         myInstAttrRefs.radius = inst_gdp->addFloatTuple(GA_ATTRIB_PRIMITIVE, "radius", 1);
-         myInstAttrRefs.pscale = inst_gdp->addFloatTuple(GA_ATTRIB_PRIMITIVE, "pscale", 1);
-         myInstAttrRefs.weight = inst_gdp->addFloatTuple(GA_ATTRIB_PRIMITIVE, "weight", 1);
-         myInstAttrRefs.width = inst_gdp->addFloatTuple(GA_ATTRIB_PRIMITIVE, "width", 1);
-         myInstAttrRefs.id = inst_gdp->addIntTuple(GA_ATTRIB_PRIMITIVE, "id", 1);
-         myInstAttrRefs.inst_id = inst_gdp->addIntTuple(GA_ATTRIB_PRIMITIVE, "inst_id", 1);
-         myInstAttrRefs.material = inst_gdp->addStringTuple(GA_ATTRIB_PRIMITIVE, "shop_materialpath", 1);
+         theInstAttrRefs->Cd = inst_gdp->addDiffuseAttribute(GEO_PRIMITIVE_DICT);
+         theInstAttrRefs->Alpha = inst_gdp->addAlphaAttribute(GEO_PRIMITIVE_DICT);
+         theInstAttrRefs->v = inst_gdp->addVelocityAttribute(GEO_PRIMITIVE_DICT);
+         theInstAttrRefs->N = inst_gdp->addNormalAttribute(GEO_PRIMITIVE_DICT);
+         theInstAttrRefs->radius = inst_gdp->addFloatTuple(GA_ATTRIB_PRIMITIVE, "radius", 1);
+         theInstAttrRefs->pscale = inst_gdp->addFloatTuple(GA_ATTRIB_PRIMITIVE, "pscale", 1);
+         theInstAttrRefs->weight = inst_gdp->addFloatTuple(GA_ATTRIB_PRIMITIVE, "weight", 1);
+         theInstAttrRefs->width = inst_gdp->addFloatTuple(GA_ATTRIB_PRIMITIVE, "width", 1);
+         theInstAttrRefs->id = inst_gdp->addIntTuple(GA_ATTRIB_PRIMITIVE, "id", 1);
+         theInstAttrRefs->inst_id = inst_gdp->addIntTuple(GA_ATTRIB_PRIMITIVE, "inst_id", 1);
+         theInstAttrRefs->material = inst_gdp->addStringTuple(GA_ATTRIB_PRIMITIVE, "shop_materialpath", 1);
 
-         myInstAttrRefs.pointCd = inst_gdp->addDiffuseAttribute(GEO_POINT_DICT);
-         myInstAttrRefs.pointAlpha = inst_gdp->addAlphaAttribute(GEO_POINT_DICT);
-         myInstAttrRefs.pointV = inst_gdp->addVelocityAttribute(GEO_POINT_DICT);
-         myInstAttrRefs.pointN = inst_gdp->addNormalAttribute(GEO_POINT_DICT);
-         myInstAttrRefs.pointRadius = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "radius", 1);
-         myInstAttrRefs.pointPscale = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "pscale", 1);
-         myInstAttrRefs.pointWeight = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "weight", 1);
-         myInstAttrRefs.pointWidth = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "width", 1);
-         myInstAttrRefs.pointId = inst_gdp->addIntTuple(GA_ATTRIB_POINT, "id", 1);
-         myInstAttrRefs.pointInstId = inst_gdp->addIntTuple(GA_ATTRIB_POINT, "inst_id", 1);
-         myInstAttrRefs.pointMaterial = inst_gdp->addStringTuple(GA_ATTRIB_POINT, "shop_materialpath", 1);
+         theInstAttrRefs->pointCd = inst_gdp->addDiffuseAttribute(GEO_POINT_DICT);
+         theInstAttrRefs->pointAlpha = inst_gdp->addAlphaAttribute(GEO_POINT_DICT);
+         theInstAttrRefs->pointV = inst_gdp->addVelocityAttribute(GEO_POINT_DICT);
+         theInstAttrRefs->pointN = inst_gdp->addNormalAttribute(GEO_POINT_DICT);
+         theInstAttrRefs->pointRadius = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "radius", 1);
+         theInstAttrRefs->pointPscale = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "pscale", 1);
+         theInstAttrRefs->pointWeight = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "weight", 1);
+         theInstAttrRefs->pointWidth = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "width", 1);
+         theInstAttrRefs->pointId = inst_gdp->addIntTuple(GA_ATTRIB_POINT, "id", 1);
+         theInstAttrRefs->pointInstId = inst_gdp->addIntTuple(GA_ATTRIB_POINT, "inst_id", 1);
+         theInstAttrRefs->pointMaterial = inst_gdp->addStringTuple(GA_ATTRIB_POINT, "shop_materialpath", 1);
 
          if(myDoMotionBlur == CLUSTER_MB_DEFORMATION) {
                myInstMBAttrRefs.Cd = mb_gdp->addDiffuseAttribute(GEO_PRIMITIVE_DICT);
@@ -89,19 +89,19 @@ void VRAY_clusterThis::createAttributeRefs(GU_Detail * inst_gdp, GU_Detail * mb_
    // Do the point attribute creation
 
    if(myPrimType == CLUSTER_POINT) {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
          cout << "VRAY_clusterThis::createAttributeRefs() Creating Point attributes" << endl;
 #endif
 
-         myInstAttrRefs.pointCd = inst_gdp->addDiffuseAttribute(GEO_POINT_DICT);
-         myInstAttrRefs.pointAlpha = inst_gdp->addAlphaAttribute(GEO_POINT_DICT);
-         myInstAttrRefs.pointV = inst_gdp->addVelocityAttribute(GEO_POINT_DICT);
-         myInstAttrRefs.pointN = inst_gdp->addNormalAttribute(GEO_POINT_DICT);
-         myInstAttrRefs.pointRadius = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "radius", 1);
-         myInstAttrRefs.pointPscale = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "pscale", 1);
-         myInstAttrRefs.pointId = inst_gdp->addIntTuple(GA_ATTRIB_POINT, "id", 1);
-         myInstAttrRefs.pointInstId = inst_gdp->addIntTuple(GA_ATTRIB_POINT, "inst_id", 1);
-         myInstAttrRefs.pointMaterial = inst_gdp->addStringTuple(GA_ATTRIB_POINT, "shop_materialpath", 1);
+         theInstAttrRefs->pointCd = inst_gdp->addDiffuseAttribute(GEO_POINT_DICT);
+         theInstAttrRefs->pointAlpha = inst_gdp->addAlphaAttribute(GEO_POINT_DICT);
+         theInstAttrRefs->pointV = inst_gdp->addVelocityAttribute(GEO_POINT_DICT);
+         theInstAttrRefs->pointN = inst_gdp->addNormalAttribute(GEO_POINT_DICT);
+         theInstAttrRefs->pointRadius = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "radius", 1);
+         theInstAttrRefs->pointPscale = inst_gdp->addFloatTuple(GA_ATTRIB_POINT, "pscale", 1);
+         theInstAttrRefs->pointId = inst_gdp->addIntTuple(GA_ATTRIB_POINT, "id", 1);
+         theInstAttrRefs->pointInstId = inst_gdp->addIntTuple(GA_ATTRIB_POINT, "inst_id", 1);
+         theInstAttrRefs->pointMaterial = inst_gdp->addStringTuple(GA_ATTRIB_POINT, "shop_materialpath", 1);
 
          if(myDoMotionBlur == CLUSTER_MB_DEFORMATION) {
                myInstMBAttrRefs.pointCd = mb_gdp->addDiffuseAttribute(GEO_POINT_DICT);
@@ -132,7 +132,7 @@ void VRAY_clusterThis::createAttributeRefs(GU_Detail * inst_gdp, GU_Detail * mb_
 int VRAY_clusterThis::getAttributeRefs(GU_Detail * inst_gdp)
 {
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::getAttributeRefs() " << endl;
 #endif
 
@@ -185,7 +185,7 @@ int VRAY_clusterThis::getAttributeRefs(GU_Detail * inst_gdp)
       }
 
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "Geometry attribute references:" << endl;
    cout << "Cd: " << myPointAttrRefs.Cd.isValid() << endl;
    cout << "Alpha: " << myPointAttrRefs.Alpha.isValid() << endl;
@@ -290,7 +290,7 @@ void VRAY_clusterThis::checkRequiredAttributes()
 inline int VRAY_clusterThis::getAttributes(GEO_Point * ppt)
 {
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::getAttributes() " << endl;
 #endif
 
@@ -323,7 +323,7 @@ inline int VRAY_clusterThis::getAttributes(GEO_Point * ppt)
    if(myPrimType == CLUSTER_FILE)
       myPointAttributes.geo_fname = ppt->getString(myPointAttrRefs.geo_fname) ;
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::getAttributes() " << "Cd: " << myPointAttributes.Cd << endl;
    cout << "VRAY_clusterThis::getAttributes() " << "Alpha: " << myPointAttributes.Alpha << endl;
    cout << "VRAY_clusterThis::getAttributes() " << "v: " << myPointAttributes.v << endl;
@@ -349,7 +349,7 @@ inline int VRAY_clusterThis::getAttributes(GEO_Point * ppt)
 inline int VRAY_clusterThis::getAttributes2(GEO_Point * ppt, VRAY_clusterThis::pt_attr_struct *thePointAttributes)
 {
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::getAttributes() " << endl;
 #endif
 
@@ -382,19 +382,19 @@ inline int VRAY_clusterThis::getAttributes2(GEO_Point * ppt, VRAY_clusterThis::p
    if(myPrimType == CLUSTER_FILE)
       thePointAttributes->geo_fname = ppt->getString(myPointAttrRefs.geo_fname) ;
 
-#ifdef DEBUG
-   cout << "VRAY_clusterThis::getAttributes() " << "Cd: " << thePointAttributes.Cd << endl;
-   cout << "VRAY_clusterThis::getAttributes() " << "Alpha: " << thePointAttributes.Alpha << endl;
-   cout << "VRAY_clusterThis::getAttributes() " << "v: " << thePointAttributes.v << endl;
-   cout << "VRAY_clusterThis::getAttributes() " << "N: " << thePointAttributes.N << endl;
-//   cout << "VRAY_clusterThis::getAttributes() " << "orient: " << thePointAttributes.orient << endl;
-   cout << "VRAY_clusterThis::getAttributes() " << "pscale: " << thePointAttributes.pscale << endl;
-   cout << "VRAY_clusterThis::getAttributes() " << "radius: " << thePointAttributes.radius << endl;
-   cout << "VRAY_clusterThis::getAttributes() " << "vdb_radius: " << thePointAttributes.vdb_radius << endl;
-   cout << "VRAY_clusterThis::getAttributes() " << "id: " << thePointAttributes.id << endl;
-   cout << "VRAY_clusterThis::getAttributes() " << "weight: " << thePointAttributes.weight << endl;
-   cout << "VRAY_clusterThis::get_attributes() " << "material: " << thePointAttributes.material << endl;
-   cout << "VRAY_clusterThis::get_attributes() " << "geo_fname: " << thePointAttributes.geo_fname << endl;
+#ifdef DCA_DEBUG
+   cout << "VRAY_clusterThis::getAttributes() " << "Cd: " << thePointAttributes->Cd << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "Alpha: " << thePointAttributes->Alpha << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "v: " << thePointAttributes->v << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "N: " << thePointAttributes->N << endl;
+//   cout << "VRAY_clusterThis::getAttributes() " << "orient: " << thePointAttributes->orient << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "pscale: " << thePointAttributes->pscale << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "radius: " << thePointAttributes->radius << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "vdb_radius: " << thePointAttributes->vdb_radius << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "id: " << thePointAttributes->id << endl;
+   cout << "VRAY_clusterThis::getAttributes() " << "weight: " << thePointAttributes->weight << endl;
+   cout << "VRAY_clusterThis::get_attributes() " << "material: " << thePointAttributes->material << endl;
+   cout << "VRAY_clusterThis::get_attributes() " << "geo_fname: " << thePointAttributes->geo_fname << endl;
    cout << "VRAY_clusterThis::getAttributes() " << "myMaterial: " << myMaterial << endl;
 #endif
 
@@ -418,7 +418,7 @@ inline int VRAY_clusterThis::getAttributes2(GEO_Point * ppt, VRAY_clusterThis::p
 inline int VRAY_clusterThis::addFileAttributeRefs(GU_Detail * inst_gdp)
 {
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::addFileAttributeOffsets() " << endl;
 #endif
 
@@ -466,7 +466,12 @@ inline void VRAY_clusterThis::setPointInstanceAttributes(GU_Detail * inst_gdp, G
                                                          )
 {
 
-#ifdef DEBUG
+assert(inst_gdp);
+assert(ppt);
+assert(thePointAttributes);
+assert(theInstAttrRefs);
+
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::setPointInstanceAttributes() " << std::endl;
 #endif
 
@@ -502,7 +507,7 @@ inline void VRAY_clusterThis::setPointInstanceAttributes(GU_Detail * inst_gdp, G
 ***************************************************************************** */
 inline void VRAY_clusterThis::setInstanceAttributes(GEO_Primitive * myGeoPrim, VRAY_clusterThis::clusterPrimTypeEnum myPrimType)
 {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::setInstanceAttributes() " << endl;
 #endif
    GEO_Point * ppt;
@@ -576,13 +581,13 @@ inline void VRAY_clusterThis::setInstanceAttributes(GEO_Primitive * myGeoPrim, V
 inline int VRAY_clusterThis::setFileAttributes(GU_Detail * file_gdp)
 {
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::setFileAttributes() " << endl;
 #endif
 
    GEO_Point * ppt;
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    long int num_points = (long int) file_gdp->points().entries();
    cout << "VRAY_clusterThis::setFileAttributes() - num points :" << num_points << endl;
 #endif

@@ -29,7 +29,7 @@ void VRAY_clusterThis::getBoundingBox(UT_BoundingBox & box)
 
    box = myVelBox;
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::getBoundingBox() box: " << box << std::endl;
 #endif
 
@@ -800,7 +800,7 @@ static short int myPasses(int mode)
 
 static inline int calculateNewInstPosition(fpreal theta, uint32 i, uint32 j)
 {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    cout << "VRAY_clusterThis::calculateNewInstPosition() i: " << i << " j: " << j << endl;
 #endif
 

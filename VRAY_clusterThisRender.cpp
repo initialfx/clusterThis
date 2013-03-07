@@ -36,6 +36,10 @@ void VRAY_clusterThis::render()
 //   myPasses(1);
    std::cout << "VRAY_clusterThis::render() - num_passes: " << myPasses(1) <<  std::endl;
 
+   if(myVerbose > CLUSTER_MSG_INFO)
+      cout << "VRAY_clusterThis::render() myLOD: " << myLOD << std::endl;
+
+
    if(myVerbose > CLUSTER_MSG_QUIET) {
          std::cout << "VRAY_clusterThis::render() - Instancing ..." <<  std::endl;
       }
@@ -81,10 +85,6 @@ void VRAY_clusterThis::render()
                   }
 
 
-               myLOD = getLevelOfDetail(myBox);
-               if(myVerbose > CLUSTER_MSG_INFO)
-                  cout << "VRAY_clusterThis::render() myLOD: " << myLOD << std::endl;
-
                if(myVerbose > CLUSTER_MSG_QUIET)
                   cout << "VRAY_clusterThis::render() Number of points of incoming geometry: " << myNumSourcePoints << std::endl;
 
@@ -120,7 +120,8 @@ void VRAY_clusterThis::render()
                   myNoise.initialize(myNoiseSeed, static_cast<UT_Noise::UT_NoiseType>(myNoiseType));
 
                // Create the attribute references for the geometry to be instanced
-               VRAY_clusterThis::createAttributeRefs(inst_gdp, mb_gdp);
+//               VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefs;
+               VRAY_clusterThis::createAttributeRefs(inst_gdp, mb_gdp, &myInstAttrRefs);
 
 //changeSetting("surface", "constant Cd ( 1 0 0 )", "object");
 
@@ -135,22 +136,14 @@ void VRAY_clusterThis::render()
                      VRAY_clusterThis::runCVEX(myGdp, myGdp, myCVEXFname_pre, CLUSTER_CVEX_POINT);
                   }
 
-
                myGDPReferences.gdp = myGdp;
                myGDPReferences.inst_gdp = inst_gdp;
                myGDPReferences.mb_gdp = mb_gdp;
                myGDPReferences.file_gdp = file_gdp;
-               float foo;
-               renderGenerateInstance(theta, &foo);
+               float result = 0;
+               renderGenerateInstance(theta, &result);
 
-
-//               myGdp = myGDPReferences.gdp;
-//               inst_gdp = myGDPReferences.inst_gdp;
-//               mb_gdp = myGDPReferences.mb_gdp;
-//               file_gdp = myGDPReferences.file_gdp;
-
-               cout << "VRAY_clusterThis::render() myInstanceNum2: " << myInstanceNum2 << std::endl;
-
+               cout << "VRAY_clusterThis::render() result: " << result << std::endl;
 
                if(myVerbose > CLUSTER_MSG_QUIET && myPrimType != CLUSTER_PRIM_CURVE)
                   cout << "VRAY_clusterThis::render() Total number of instances: " << myInstanceNum << std::endl;
@@ -227,6 +220,7 @@ void VRAY_clusterThis::render()
 
 
          // Geo has already been generated ...
+         // TODO: place this block of code into it's own function, clusterThisRenderCache() (or something like that)
          else {
                if(myVerbose > CLUSTER_MSG_QUIET)
                   cout << "VRAY_clusterThis::render() - Already generated geometry, reading temp geo file: " << myTempFname << std::endl;
@@ -322,17 +316,13 @@ void VRAY_clusterThis::render()
 void VRAY_clusterThis::renderGenerateInstancePartial(float theta, float * result, const UT_JobInfo & info)
 
 {
-   GU_Detail * inst_gdp_tmp;
-   GU_Detail * inst_gdp1;
-   GU_Detail * inst_gdp2;
+//   GU_Detail * inst_gdp_tmp;
+//   GU_Detail * inst_gdp1;
+//   GU_Detail * inst_gdp2;
    GU_Detail * foo_gdp;
 
-   VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefsTMP;
-   VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefs1;
-   VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefs2;
-
-   inst_gdp1 = VRAY_Procedural::allocateGeometry();
-   inst_gdp2 = VRAY_Procedural::allocateGeometry();
+//   inst_gdp1 = VRAY_Procedural::allocateGeometry();
+//   inst_gdp2 = VRAY_Procedural::allocateGeometry();
 
 
    GEO_Point * ppt;
@@ -366,16 +356,16 @@ void VRAY_clusterThis::renderGenerateInstancePartial(float theta, float * result
 
 
    if(job == 0) {
-         inst_gdp_tmp = inst_gdp1;
-         VRAY_clusterThis::createAttributeRefs(inst_gdp1, foo_gdp, theInstAttrRefs1);
-         theInstAttrRefsTMP = theInstAttrRefs1;
+//         inst_gdp_tmp = inst_gdp1;
+         VRAY_clusterThis::createAttributeRefs(myGDPReferences.inst_gdp, foo_gdp, &myInstAttrRefs);
+//         theInstAttrRefsTMP = theInstAttrRefs1;
       }
 
-   else {
-         inst_gdp_tmp = inst_gdp2;
-         VRAY_clusterThis::createAttributeRefs(inst_gdp2, foo_gdp, theInstAttrRefs2);
-         theInstAttrRefsTMP = theInstAttrRefs2;
-      }
+//   else {
+//         inst_gdp_tmp = inst_gdp2;
+//         VRAY_clusterThis::createAttributeRefs(myGDPReferences.inst_gdp, foo_gdp, &myInstAttrRefs);
+////         theInstAttrRefsTMP = theInstAttrRefs2;
+//      }
 
 
 /// For each point of the incoming geometry
@@ -416,7 +406,7 @@ void VRAY_clusterThis::renderGenerateInstancePartial(float theta, float * result
                                  // Create a primitive based upon user's selection
                                  switch(myPrimType) {
                                        case CLUSTER_POINT:
-                                          VRAY_clusterThis::instancePoint(inst_gdp_tmp, myGDPReferences.mb_gdp, &thePointAttributes, theInstAttrRefsTMP);
+                                          VRAY_clusterThis::instancePoint(myGDPReferences.inst_gdp, myGDPReferences.mb_gdp, &thePointAttributes, &myInstAttrRefs);
                                           break;
                                        case CLUSTER_PRIM_SPHERE:
                                           VRAY_clusterThis::instanceSphere(myGDPReferences.inst_gdp, myGDPReferences.mb_gdp);
@@ -456,7 +446,8 @@ void VRAY_clusterThis::renderGenerateInstancePartial(float theta, float * result
          // Print out stats to the console
          if(myVerbose > CLUSTER_MSG_INFO && (myPrimType != CLUSTER_PRIM_CURVE))
             if((long int)(point_num % stat_interval) == 0)
-               cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job << " Number of points processed: " << point_num << " Number of instances: " << myInstanceNum << std::endl;
+               cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job << " Number of points processed: "
+                    << point_num << " Number of instances: " << myInstanceNum << std::endl;
 
       } // for all points ...
 
@@ -469,26 +460,28 @@ void VRAY_clusterThis::renderGenerateInstancePartial(float theta, float * result
       *result += point_num;
       cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job
            << " XXXXXXXXXXXXXXXXXXXXXX *result: " << *result << std::endl;
-      sleep(5);
+//      sleep(5);
    }
 
-   myGDPReferences.inst_gdp->merge(*inst_gdp1);
-   myGDPReferences.inst_gdp->merge(*inst_gdp2);
+//   myGDPReferences.inst_gdp->merge(*inst_gdp1);
+//   if(job == 1)
+//      myGDPReferences.inst_gdp->merge(*inst_gdp2);
 //   myGDPReferences.mb_gdp.merge;
 
-   cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job << " merged geometry"  << std::endl;
-
-
-   if(inst_gdp1)
-      VRAY_Procedural::freeGeometry(inst_gdp1);
-   if(inst_gdp2)
-      VRAY_Procedural::freeGeometry(inst_gdp2);
-
-   cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job << " freeGeometry()"  << std::endl;
+//   cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job << " merged geometry"  << std::endl;
+//
+//
+//   if(inst_gdp1)
+//      VRAY_Procedural::freeGeometry(inst_gdp1);
+//   if(inst_gdp2)
+//      VRAY_Procedural::freeGeometry(inst_gdp2);
+//
+//   cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job << " freeGeometry()"  << std::endl;
 
    std::time(&myRenderGenEndTime);
    myRenderGenExecTime = std::clock() - myRenderGenTime;
 
+   cout << "VRAY_clusterThis::renderGenerateInstancePartial() - Finished " << std::endl;
 
 }
 

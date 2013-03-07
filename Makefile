@@ -24,19 +24,23 @@ BUILD_TMP = $(shell grep BUILD_VERSION_DEV version.h | cut -f 3 -d ' ')
 #MINOR_VER = "5"
 #BUILD_VER = $(shell expr $(BUILD_TMP) + 365 - $(today))
 BUILD_VER = $(shell expr $(BUILD_TMP) + $(today))
+GCC_DEBUG_FLAG = -DDEBUG
+#DCA_DEBUG_FLAG = -DDCA_DEBUG
 
 else
 DBG=
 MAJOR_VER = $(shell grep MAJOR_VERSION_PUB version.h | cut -f 3 -d ' ')
 MINOR_VER = $(shell grep MINOR_VERSION_PUB version.h | cut -f 3 -d ' ')
 BUILD_VER = $(shell grep BUILD_VERSION_PUB version.h | cut -f 3 -d ' ')
+GCC_DEBUG_FLAG = -DNDEBUG
 endif
 
 SRC_VER = $(MAJOR_VER).$(MINOR_VER).$(BUILD_VER)
 SRC_VER_FLAGS = -DMAJOR_VER=$(MAJOR_VER) -DMINOR_VER=$(MINOR_VER) -DBUILD_VER=$(BUILD_VER)
 
 TAGINFO = $(shell (echo -n "Compiled on:" `date`"\n  by:" `whoami`@`hostname`"\n$(SESI_TAGINFO)") | /opt/hfs/bin/sesitag -m)
-CFLAGS := $(CFLAGS) $(H_CFLAGS) -I/usr/local/include/ $(SRC_VER_FLAGS) $(TAGINFO) -ftree-vectorize -ftree-vectorizer-verbose=0
+CFLAGS := $(CFLAGS) $(H_CFLAGS) -I/usr/local/include/ $(SRC_VER_FLAGS) $(TAGINFO) \
+-ftree-vectorize -ftree-vectorizer-verbose=0 $(GCC_DEBUG_FLAG) $(DCA_DEBUG_FLAG)
 
 INSTDIR = $(DCA_COMMON)/lib/houdini/dso_x86_64/mantra/
 DSONAME = VRAY_clusterThis.so

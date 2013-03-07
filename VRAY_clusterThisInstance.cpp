@@ -28,11 +28,13 @@ inline int VRAY_clusterThis::instancePoint(GU_Detail * inst_gdp, GU_Detail * mb_
                                    )
 {
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::instancePoint()" << std::endl;
 #endif
 
-   std::cout << "VRAY_clusterThis::instancePoint() " << thePointAttributes->myNewPos << std::endl;
+assert(theInstAttrRefs);
+
+//   std::cout << "VRAY_clusterThis::instancePoint() " << thePointAttributes->myNewPos << std::endl;
 
    GEO_Point * ppt;
 
@@ -78,7 +80,7 @@ inline int VRAY_clusterThis::instancePoint(GU_Detail * inst_gdp, GU_Detail * mb_
 int VRAY_clusterThis::instanceSphere(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 {
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::instanceSphere()" << std::endl;
 #endif
 
@@ -137,7 +139,7 @@ int VRAY_clusterThis::instanceSphere(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 ***************************************************************************** */
 int VRAY_clusterThis::instanceCube(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::instanceCube()" << std::endl;
 #endif
 
@@ -214,7 +216,7 @@ int VRAY_clusterThis::instanceCube(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 ***************************************************************************** */
 int VRAY_clusterThis::instanceGrid(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::instanceGrid()" << std::endl;
 #endif
 
@@ -301,7 +303,7 @@ int VRAY_clusterThis::instanceGrid(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 ***************************************************************************** */
 int VRAY_clusterThis::instanceTube(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::instanceTube()" << std::endl;
 #endif
 
@@ -420,7 +422,7 @@ int VRAY_clusterThis::instanceTube(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 ***************************************************************************** */
 int VRAY_clusterThis::instanceCircle(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::instanceCircle()" << std::endl;
 #endif
 
@@ -480,7 +482,7 @@ int VRAY_clusterThis::instanceCircle(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 ***************************************************************************** */
 int VRAY_clusterThis::instanceCurve(GU_Detail * inst_gdp, GU_Detail * mb_gdp, fpreal theta, long int point_num)
 {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::instanceCurve()" << std::endl;
 #endif
 
@@ -620,7 +622,7 @@ int VRAY_clusterThis::instanceCurve(GU_Detail * inst_gdp, GU_Detail * mb_gdp, fp
 int VRAY_clusterThis::instanceMetaball(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 {
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::instanceMetaball()" << std::endl;
 #endif
 
@@ -673,7 +675,7 @@ int VRAY_clusterThis::instanceMetaball(GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 ***************************************************************************** */
 int VRAY_clusterThis::instanceFile(GU_Detail * file_gdp, GU_Detail * inst_gdp, GU_Detail * mb_gdp)
 {
-#ifdef DEBUG
+#ifdef DCA_DEBUG
    std::cout << "VRAY_clusterThis::instanceFile()" << std::endl;
    cout << "VRAY_clusterThis::instanceFile() myPointAttributes.geo_fname: " << myPointAttributes.geo_fname << endl;
 #endif

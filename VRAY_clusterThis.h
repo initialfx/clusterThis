@@ -12,7 +12,6 @@
 #ifndef __VRAY_clusterThis_h__
 #define __VRAY_clusterThis_h__
 
-//#define DEBUG
 
 static const fpreal CLUSTER_BBOX_MIN = 0.00001;
 
@@ -135,6 +134,8 @@ class VRAY_clusterThis : public VRAY_Procedural
       }
       virtual void render();
 
+
+
       THREADED_METHOD2(                               // Construct two parameter threaded method
          VRAY_clusterThis,                            // Name of class
          myInstanceNum > myThreadDataLimitLength,     // Evaluated to see if we should multithread.
@@ -148,11 +149,12 @@ class VRAY_clusterThis : public VRAY_Procedural
 
       THREADED_METHOD2(                               // Construct two parameter threaded method
          VRAY_clusterThis,                            // Name of class
-         1,     // Evaluated to see if we should multithread.
+         0,     // Evaluated to see if we should multithread.
 //         myNumSourcePoints > myThreadDataLimitLength,     // Evaluated to see if we should multithread.
          renderGenerateInstance,                      // Name of function
          float, theta,
          float *, result)
+
 
       void renderGenerateInstancePartial(float theta, float * result, const UT_JobInfo & info);
 
@@ -294,39 +296,41 @@ class VRAY_clusterThis : public VRAY_Procedural
          GA_RWAttributeRef pointPscale;
          GA_RWAttributeRef pointRadius;
          GA_RWAttributeRef pointVDBRadius;
-      } myInstAttrRefs;
+      };
 
+VRAY_clusterThis::inst_attr_ref_struct myInstAttrRefs;
+VRAY_clusterThis::inst_attr_ref_struct myInstMBAttrRefs;
 
-      struct inst_mb_attr_ref_struct {
-         GA_RWAttributeRef Cd;
-         GA_RWAttributeRef Alpha;
-         GA_RWAttributeRef v;
-         GA_RWAttributeRef N;
-//         GA_RWAttributeRef orient;
-         GA_RWAttributeRef material;
-         GA_RWAttributeRef id;
-         GA_RWAttributeRef inst_id;
-         GA_RWAttributeRef pscale;
-         GA_RWAttributeRef radius;
-         GA_RWAttributeRef weight;
-         GA_RWAttributeRef width;
-         GA_RWAttributeRef pointCd;
-         GA_RWAttributeRef pointAlpha;
-         GA_RWAttributeRef pointV;
-         GA_RWAttributeRef pointBacktrack;
-         GA_RWAttributeRef pointN;
-         GA_RWAttributeRef pointUp;
-//         GA_RWAttributeRef pointOrient;
-         GA_RWAttributeRef pointMaterial;
-         GA_RWAttributeRef pointWeight;
-         GA_RWAttributeRef pointWidth;
-         GA_RWAttributeRef pointId;
-         GA_RWAttributeRef pointInstId;
-         GA_RWAttributeRef pointPscale;
-         GA_RWAttributeRef pointRadius;
-         GA_RWAttributeRef pointVDBRadius;
-      } myInstMBAttrRefs;
-
+//      struct inst_mb_attr_ref_struct {
+//         GA_RWAttributeRef Cd;
+//         GA_RWAttributeRef Alpha;
+//         GA_RWAttributeRef v;
+//         GA_RWAttributeRef N;
+////         GA_RWAttributeRef orient;
+//         GA_RWAttributeRef material;
+//         GA_RWAttributeRef id;
+//         GA_RWAttributeRef inst_id;
+//         GA_RWAttributeRef pscale;
+//         GA_RWAttributeRef radius;
+//         GA_RWAttributeRef weight;
+//         GA_RWAttributeRef width;
+//         GA_RWAttributeRef pointCd;
+//         GA_RWAttributeRef pointAlpha;
+//         GA_RWAttributeRef pointV;
+//         GA_RWAttributeRef pointBacktrack;
+//         GA_RWAttributeRef pointN;
+//         GA_RWAttributeRef pointUp;
+////         GA_RWAttributeRef pointOrient;
+//         GA_RWAttributeRef pointMaterial;
+//         GA_RWAttributeRef pointWeight;
+//         GA_RWAttributeRef pointWidth;
+//         GA_RWAttributeRef pointId;
+//         GA_RWAttributeRef pointInstId;
+//         GA_RWAttributeRef pointPscale;
+//         GA_RWAttributeRef pointRadius;
+//         GA_RWAttributeRef pointVDBRadius;
+//      } myInstMBAttrRefs;
+//
 
       // gdp data struct
       struct gdp_ref_struct {
@@ -343,7 +347,8 @@ class VRAY_clusterThis : public VRAY_Procedural
       void  calculateNewPosition(fpreal theta, uint32 i, uint32 j, VRAY_clusterThis::pt_attr_struct * thePointAttributes);
       void  dumpParameters();
       int   preLoadGeoFile(GU_Detail * file_gdp);
-      void  createAttributeRefs(GU_Detail * inst_gdp, GU_Detail * mb_gdp);
+      void  createAttributeRefs(GU_Detail * inst_gdp, GU_Detail * mb_gdp,
+                                VRAY_clusterThis::inst_attr_ref_struct * theInstAttrRefs);
       int   getAttributeRefs(GU_Detail * gdp);
       int   getAttributes(GEO_Point * ppt);
       int   getAttributes2(GEO_Point * ppt, VRAY_clusterThis::pt_attr_struct * thePointAttributes);
@@ -398,7 +403,6 @@ class VRAY_clusterThis : public VRAY_Procedural
 //      UT_String myOTLVersion;
       fpreal   myVelocityScale;
       long int myInstanceNum;
-      long int myInstanceNum2;
       uint64_t myThreadDataLimitLength;
       fpreal   myLOD;
       static const fpreal myFPS = 24.0;

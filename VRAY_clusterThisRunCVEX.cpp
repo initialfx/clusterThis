@@ -283,7 +283,7 @@ int VRAY_clusterThis::runCVEX(GU_Detail * inst_gdp, GU_Detail * mb_gdp, UT_Strin
 
 
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
                std::cout << "VRAY_clusterThis::runCVEX() - Retrieved attribute references" << std::endl;
 #endif
 
@@ -452,7 +452,7 @@ int VRAY_clusterThis::runCVEX(GU_Detail * inst_gdp, GU_Detail * mb_gdp, UT_Strin
                   }
 
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
                std::cout << "VRAY_clusterThis::runCVEX() - Finished storing attributes" << std::endl;
 #endif
 
@@ -505,7 +505,7 @@ int VRAY_clusterThis::runCVEX(GU_Detail * inst_gdp, GU_Detail * mb_gdp, UT_Strin
                // Add a time input parm
                cvex.addInput("time", CVEX_TYPE_FLOAT, &time, 1);
 
-#ifdef DEBUG
+#ifdef DCA_DEBUG
                std::cout << "VRAY_clusterThis::runCVEX() - Added inputs" << std::endl;
 #endif
 
