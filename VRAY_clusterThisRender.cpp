@@ -141,7 +141,7 @@ void VRAY_clusterThis::render()
                myGDPReferences.mb_gdp = mb_gdp;
                myGDPReferences.file_gdp = file_gdp;
                float result = 0;
-               renderGenerateInstance(theta, &result);
+               VRAY_clusterThis::renderGenerateInstance(theta, &result);
 
                cout << "VRAY_clusterThis::render() result: " << result << std::endl;
 
@@ -453,7 +453,7 @@ void VRAY_clusterThis::renderGenerateInstancePartial(float theta, float * result
 
 
    {
-      UT_AutoJobInfoLock foo(info);
+      UT_AutoJobInfoLock lock_file(info);
 
 //     cout << "VRAY_clusterThis::renderGenerateInstancePartial() - job# " << job << " LOCK a: " << a << std::endl;
 

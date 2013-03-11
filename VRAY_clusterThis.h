@@ -155,7 +155,6 @@ class VRAY_clusterThis : public VRAY_Procedural
          float, theta,
          float *, result)
 
-
       void renderGenerateInstancePartial(float theta, float * result, const UT_JobInfo & info);
 
 
