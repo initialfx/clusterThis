@@ -6,4 +6,4 @@
 // Published version
 #define MAJOR_VERSION_PUB 2
 #define MINOR_VERSION_PUB 5
-#define BUILD_VERSION_PUB 366
+#define BUILD_VERSION_PUB 426

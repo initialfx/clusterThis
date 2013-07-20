@@ -4,7 +4,7 @@
 *
 * Description : This DSO  will instance geomtery or volumes during the render of mantra IFD's
 *
-*    Digital Cinema Arts (C) 2008-2012
+*    Digital Cinema Arts (C) 2008-2013
 *
 * This work is licensed under the Creative Commons Attribution-ShareAlike 2.5 License.
 * To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/2.5/ or send a letter to
